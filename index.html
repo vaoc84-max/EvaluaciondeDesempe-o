@@ -437,6 +437,16 @@ body.supervisor #saveBtn,body.supervisor #newBtn,body.supervisor #addDev,body.su
 .dash-row .dz{font-size:10.5px;color:var(--tx-faint);flex:none}
 .dash-row .chip{flex:none}
 .dash-empty{text-align:center;color:var(--tx-faint);font-size:13px;padding:30px 0}
+.seg-list{display:flex;flex-direction:column;gap:6px;max-height:340px;overflow:auto}
+.seg-row{border:1px solid var(--line-2,#eee);border-radius:9px;padding:9px 11px}
+.seg-row.venc{border-color:#f0c4cb;background:#fff7f8}
+.seg-row.porv{border-color:#f0dca8;background:#fffdf5}
+.seg-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:3px}
+.seg-nm{font-size:12.8px;font-weight:800;color:var(--tx)}
+.seg-ag{font-size:10.5px;color:var(--tx-faint)}
+.seg-chip{margin-left:auto;font-size:10px;font-weight:800;color:#fff;padding:2px 8px;border-radius:6px;white-space:nowrap}
+.seg-obj{font-size:12.5px;color:var(--tx);line-height:1.4}
+.seg-meta{font-size:11px;color:var(--tx-faint);margin-top:2px;line-height:1.4}
 </style>
 </head>
 <body>
@@ -460,6 +470,10 @@ body.supervisor #saveBtn,body.supervisor #newBtn,body.supervisor #addDev,body.su
   <button class="btn" id="adminBtn" style="display:none" title="Administrar usuarios">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 7a4 4 0 1 0 0-.01M19 8v6M22 11h-6"/></svg>
     <span class="lbl-full">Usuarios</span>
+  </button>
+  <button class="btn" id="segBtn" title="Seguimiento de planes de desarrollo" style="display:none">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+    <span class="lbl-full">Seguimiento</span>
   </button>
   <button class="btn" id="panelBtn" title="Resumen visual de mi equipo">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18M7 16l4-5 3 3 5-7"/></svg>
@@ -736,6 +750,16 @@ body.supervisor #saveBtn,body.supervisor #newBtn,body.supervisor #addDev,body.su
       <button class="btn ghost sm" id="dashClose">✕</button>
     </div>
     <div class="modal-b" id="dashBody"></div>
+  </div>
+</div>
+
+<div id="segModal" class="modal-bg">
+  <div class="modal" style="width:min(820px,100%)">
+    <div class="modal-h">
+      <div class="ttl"><span class="dot"></span>Seguimiento de planes de desarrollo</div>
+      <button class="btn ghost sm" id="segClose">✕</button>
+    </div>
+    <div class="modal-b" id="segBody"></div>
   </div>
 </div>
 
@@ -1205,9 +1229,7 @@ function renderDev(){
           <div class="dev-meta">
             <div class="field"><label>Fecha de inicio</label><input type="date" data-k="inicio" value="${d.inicio||''}"></div>
             <div class="field"><label>Fecha de cierre</label><input type="date" data-k="cierre" value="${d.cierre||''}"></div>
-            <div class="field"><label>Quién propone</label><input data-k="propone" value="${esc(d.propone)}" placeholder="Nombre"></div>
-            <div class="field"><label>Status</label><select data-k="status">${STATUS.map(s=>`<option ${d.status===s?'selected':''}>${s}</option>`).join('')}</select></div>
-            <div class="field" style="grid-column:span 2"><label>Comentarios del progreso actual</label><input data-k="comentarios" value="${esc(d.comentarios)}" placeholder="Avance…"></div>
+            <div class="field" style="grid-column:span 2"><label>Quién propone</label><input data-k="propone" value="${esc(d.propone)}" placeholder="Nombre"></div>
           </div>
         </div>
       </div>
@@ -1772,7 +1794,7 @@ function buildPDF(){
       doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor(...DARK);
       const ob=doc.splitTextToSize((i+1)+'. '+(d.objetivo||'(sin objetivo)'),CW);doc.text(ob,M,y);y+=ob.length*11+2;
       doc.setFont('helvetica','normal');doc.setFontSize(7.8);doc.setTextColor(...SOFT);
-      doc.text('Status: '+(d.status||'—')+'   ·   Inicio: '+(d.inicio||'—')+'   ·   Cierre: '+(d.cierre||'—')+(d.competencia?'   ·   Mejora: '+d.competencia:''),M+6,y);y+=12;
+      doc.text('Inicio: '+(d.inicio||'—')+'   ·   Cierre: '+(d.cierre||'—')+(d.competencia?'   ·   Mejora: '+d.competencia:''),M+6,y);y+=12;
       (d.acciones||[]).filter(Boolean).forEach((a,j)=>{const aa=doc.splitTextToSize('   '+(j+1)+'. '+a,CW-12);ensure(aa.length*9+2);doc.text(aa,M+6,y);y+=aa.length*9;});
       y+=8;
     });
@@ -1867,6 +1889,7 @@ function paintSession(){
   $('sessChip').classList.toggle('sup',sup||admin);
   document.body.classList.toggle('supervisor',sup);
   $('adminBtn').style.display = (sup||admin) ? '' : 'none';
+  $('segBtn').style.display = (sup||admin) ? '' : 'none';
   $('panelBtn').style.display = sup ? 'none' : '';
   $('xlsBtn').title = (sup||admin) ? 'Exportar TODAS las evaluaciones a Excel' : 'Exportar mis evaluaciones a Excel';
   // banner de contexto
@@ -2003,6 +2026,70 @@ function renderAdmin(users){
 }
 $('adminBtn').onclick=openAdmin;
 $('adminClose').onclick=()=>$('adminModal').classList.remove('show');
+
+/* ============================ SEGUIMIENTO DE PLANES (supervisor · admin) ============================ */
+function openSeguimiento(){ $('segModal').classList.add('show'); renderSeguimiento(); }
+const EST_COLOR={'Vencido':'#c8102e','Por vencer':'#e0a526','Vigente':'#2e7d4f','Por iniciar':'#2563c8','Sin fecha':'#7c7d80'};
+const DIAS_AVISO=15; // objetivo "por vencer" si cierra dentro de estos días
+function planEstado(d){
+  const hoy=new Date(); hoy.setHours(0,0,0,0);
+  const par=s=>{ if(!s)return null; const x=new Date(s+'T00:00:00'); return isNaN(x)?null:x; };
+  const ini=par(d.inicio), cie=par(d.cierre);
+  if(!cie) return 'Sin fecha';
+  if(ini && ini>hoy) return 'Por iniciar';
+  if(cie<hoy) return 'Vencido';
+  const dias=Math.round((cie-hoy)/86400000);
+  if(dias<=DIAS_AVISO) return 'Por vencer';
+  return 'Vigente';
+}
+function diasTexto(d){
+  const hoy=new Date(); hoy.setHours(0,0,0,0);
+  if(!d.cierre) return '';
+  const c=new Date(d.cierre+'T00:00:00'); if(isNaN(c))return '';
+  const dias=Math.round((c-hoy)/86400000);
+  if(dias<0) return 'venció hace '+Math.abs(dias)+' día'+(Math.abs(dias)===1?'':'s');
+  if(dias===0) return 'vence hoy';
+  return 'vence en '+dias+' día'+(dias===1?'':'s');
+}
+function renderSeguimiento(){
+  const body=$('segBody');
+  const items=[];
+  DB.forEach(e=>{
+    (e.desarrollo||[]).forEach(d=>{
+      if(!(d.objetivo||'').trim())return;
+      items.push({colaborador:e.colaborador||'(Sin nombre)', agencia:e.agencia||e.zona||e.region||'—', d, est:planEstado(d)});
+    });
+  });
+  if(!items.length){ body.innerHTML='<div class="dash-empty">Aún no hay objetivos de desarrollo registrados en las evaluaciones del período.</div>'; return; }
+  const n=items.length;
+  const cnt=est=>items.filter(x=>x.est===est).length;
+  const venc=cnt('Vencido'), pv=cnt('Por vencer'), vig=cnt('Vigente'), pi=cnt('Por iniciar'), sf=cnt('Sin fecha');
+  const kpi=(v,l,c)=>`<div class="dash-kpi"><div class="v"${c?` style="color:${c}"`:''}>${v}</div><div class="l">${l}</div></div>`;
+  const ord={'Vencido':0,'Por vencer':1,'Vigente':2,'Por iniciar':3,'Sin fecha':4};
+  const chip=est=>`<span class="seg-chip" style="background:${EST_COLOR[est]||'#7c7d80'}">${est}</span>`;
+  const rows=items.slice().sort((a,b)=>(ord[a.est]-ord[b.est])||a.colaborador.localeCompare(b.colaborador)).map(x=>{
+    const dt=diasTexto(x.d);
+    return `<div class="seg-row${x.est==='Vencido'?' venc':(x.est==='Por vencer'?' porv':'')}">
+      <div class="seg-main">
+        <div class="seg-top"><span class="seg-nm">${esc(x.colaborador)}</span><span class="seg-ag">${esc(x.agencia)}</span>${chip(x.est)}</div>
+        <div class="seg-obj">${esc(x.d.objetivo)}</div>
+        <div class="seg-meta">${x.d.inicio?('inicio '+x.d.inicio+' '):''}${x.d.cierre?('· cierre '+x.d.cierre+(dt?' ('+dt+')':'')):'sin fecha de cierre'}${x.d.competencia?(' · '+esc(x.d.competencia)):''}</div>
+      </div>
+    </div>`;}).join('');
+  body.innerHTML=`
+    <div class="dash-sub">Período ${PERIODO_ACTUAL} · ${n} objetivo${n===1?'':'s'} de desarrollo · el estado se calcula automáticamente según la fecha de cierre</div>
+    <div class="dash-kpis" style="grid-template-columns:repeat(5,1fr)">
+      ${kpi(venc,'Vencidos', venc?'#c8102e':'')}
+      ${kpi(pv,'Por vencer', pv?'#e0a526':'')}
+      ${kpi(vig,'Vigentes','#2e7d4f')}
+      ${kpi(pi,'Por iniciar','#2563c8')}
+      ${kpi(sf,'Sin fecha','#7c7d80')}
+    </div>
+    <p class="dash-h">Detalle por evaluado${venc?' · vencidos primero':''}</p>
+    <div class="seg-list">${rows}</div>`;
+}
+$('segBtn').onclick=openSeguimiento;
+$('segClose').onclick=()=>$('segModal').classList.remove('show');
 async function seedUsers(){
   if(!confirm('¿Cargar los '+SEED_USERS.length+' perfiles de la nómina inicial?\nSe crean/actualizan los perfiles (no las contraseñas). No borra evaluaciones ni sobrescribe usuarios que edites después.'))return;
   const sb=$('seedBtn'); if(sb){sb.disabled=true;sb.textContent='Cargando…';}
