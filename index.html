@@ -395,6 +395,8 @@ input,textarea,select{font-family:inherit;font-size:13.5px;color:var(--tx)}
   display:flex;align-items:center;gap:11px;font-size:12.5px;color:var(--gris)}
 .sup-banner svg{width:18px;height:18px;color:var(--rojo);flex:none}
 .sup-banner b{color:var(--rojo)}
+.sup-banner.admin{background:linear-gradient(90deg,#eef8f1,#fafbfc);border-color:#bfe3cb}
+.sup-banner.admin svg,.sup-banner.admin b{color:#1f9d57}
 body.supervisor .tabpane input,body.supervisor .tabpane textarea,body.supervisor .tabpane select,body.supervisor .tabpane .na-btn,body.supervisor .tabpane .rate button{pointer-events:none;background:#fbfbfc}
 body.supervisor #saveBtn,body.supervisor #newBtn,body.supervisor #addDev,body.supervisor .pdf-label,body.supervisor #useConcBtn,body.supervisor .del-btn,body.supervisor #dropZone{display:none!important}
 /* admin */
@@ -406,6 +408,10 @@ body.supervisor #saveBtn,body.supervisor #newBtn,body.supervisor #addDev,body.su
 .adm-save:hover{background:var(--rojo-d)}
 .adm-sep{grid-column:1/3;font-size:10.5px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:var(--tx-faint);margin:6px 0 4px}
 .adm-note{font-size:11.5px;color:var(--tx-faint);margin:6px 0 14px;line-height:1.5}
+.adm-seed{display:flex;align-items:center;gap:12px;justify-content:space-between;background:#eef8f1;border:1px solid #bfe3cb;border-radius:10px;padding:11px 13px;margin-bottom:14px;font-size:12px;color:var(--gris);line-height:1.45}
+.adm-seed b{color:#1f9d57}
+.adm-seed button{flex:none;background:#1f9d57;color:#fff;border:none;border-radius:8px;padding:9px 14px;font-weight:700;cursor:pointer;font-size:12.5px}
+.adm-seed button:disabled{opacity:.6;cursor:default}
 /* dashboard del equipo */
 .dash-sub{font-size:11.5px;color:var(--tx-faint);margin:-2px 0 14px}
 .dash-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
@@ -779,10 +785,53 @@ const FIREBASE_CONFIG = {
   messagingSenderId: "300300147453",
   appId: "1:300300147453:web:db7dbe2c6722a2b552bc94"
 };
-/* >>> 2. Los 2 perfiles supervisores (solo lectura · ven y exportan TODO). */
-const SUPERVISORES = ['presidencia@faces.fin.ec'];
+/* >>> 2. Supervisor (solo lectura · ve y exporta TODO). */
+const SUPERVISORES = ['lbastidas@faces.org.ec'];
+/* >>> 2b. Administrador (acceso total · ve todo, edita todo, gestiona usuarios · soporte). */
+const ADMINS = ['vortega@faces.org.ec'];
 /* >>> 3. Período de evaluación activo */
 let PERIODO_ACTUAL = '2026-S1';
+
+/* >>> Nómina inicial de evaluadores (para el cargador masivo del panel Usuarios). */
+const SEED_USERS=[
+  {email:"ctorres@faces.org.ec",nombre:"TORRES BALCAZAR CELENIA DEL ROSARIO",rol:"jefe_agencia",region:"SUR",zona:"ZONA 2 LOJA",agencia:"CATAMAYO"},
+  {email:"fvallejo@faces.org.ec",nombre:"VALLEJO JIMENEZ FLOR MARIA",rol:"jefe_agencia",region:"SUR",zona:"ZONA 3 ZAMORA",agencia:"MALACATOS"},
+  {email:"gcastillo@faces.org.ec",nombre:"CASTILLO OLMEDO GLENIA VERONICA",rol:"jefe_agencia",region:"SUR",zona:"ZONA 2 LOJA",agencia:"CARIAMANGA"},
+  {email:"lvillacis@faces.ec",nombre:"VILLACIS MUÑOZ LEIZER EFREN",rol:"jefe_agencia",region:"SUR",zona:"ZONA 3 ZAMORA",agencia:"ZUMBA"},
+  {email:"rpena@faces.org.ec",nombre:"PEÑA TOLEDO RAMIRO VINICIO",rol:"jefe_zonal",region:"",zona:"",agencia:""},
+  {email:"vortega@faces.org.ec",nombre:"ORTEGA CORTEZ VICTOR ANGEL",rol:"jefe_regional",region:"",zona:"",agencia:""},
+  {email:"acamacho@faces.ec",nombre:"CAMACHO ROGEL ANGELA FERNANDA",rol:"jefe_agencia",region:"SUR",zona:"ZONA 1 LOJA",agencia:"OFICINA CENTRO"},
+  {email:"myiniguez@faces.ec",nombre:"IÑIGUEZ CASTILLO MANUEL YOVANY",rol:"jefe_agencia",region:"SUR",zona:"ZONA 3 ZAMORA",agencia:"PALANDA"},
+  {email:"ajcodena@faces.ec",nombre:"CODENA QUINCHE ALEX JAVIER",rol:"jefe_agencia",region:"SUR",zona:"ZONA 3 ZAMORA",agencia:"ZAMORA"},
+  {email:"dvivanco@faces.org.ec",nombre:"VIVANCO ANDALUZ DIEGO ALEXANDER",rol:"jefe_agencia",region:"SUR",zona:"ZONA 2 LOJA",agencia:"CATACOCHA"},
+  {email:"ndsolorzano@faces.org.ec",nombre:"SOLORZANO JIMENEZ NESTOR DANIEL",rol:"jefe_agencia",region:"NORTE",zona:"ZONA 7 COSTA NORTE",agencia:"SAN MIGUEL"},
+  {email:"lgloor@faces.org.ec",nombre:"LOOR ARTEAGA LUIS GABRIEL",rol:"jefe_agencia",region:"NORTE",zona:"ZONA 7 COSTA NORTE",agencia:"EL CARMEN"},
+  {email:"cdbastidas@faces.org.ec",nombre:"BASTIDAS GUAILLA CRISTIAN DARIO",rol:"jefe_zonal",region:"NORTE",zona:"ZONA 7 COSTA NORTE",agencia:""},
+  {email:"anmendoza@faces.org.ec",nombre:"MENDOZA CASTILLO AIDA NOEMI",rol:"jefe_agencia",region:"NORTE",zona:"ZONA 7 COSTA NORTE",agencia:"QUININDE"},
+  {email:"jgvilla@faces.org.ec",nombre:"VILLA SANDOVAL JACINTO GABRIEL",rol:"jefe_agencia",region:"COSTA",zona:"ZONA 5 GUAYAS",agencia:"NARANJAL"},
+  {email:"dapalacios@faces.org.ec",nombre:"PALACIOS PALACIOS DARIO ALEJANDRO",rol:"jefe_regional",region:"NORTE",zona:"",agencia:""},
+  {email:"aaparra@faces.org.ec",nombre:"PARRA TABOADA ADRIANA ALEJANDRA",rol:"jefe_agencia",region:"NORTE",zona:"ZONA 6 SIERRA NORTE",agencia:"QUINCHE"},
+  {email:"ypalcivar@faces.org.ec",nombre:"ALCIVAR CERVANTES YENDRY PATRICIO",rol:"jefe_agencia",region:"NORTE",zona:"ZONA 7 COSTA NORTE",agencia:"FLAVIO ALFARO"},
+  {email:"ssgarcia@faces.org.ec",nombre:"GARCIA CHURACO SEGUNDO SALVADOR",rol:"jefe_agencia",region:"NORTE",zona:"ZONA 6 SIERRA NORTE",agencia:"CAYAMBE"},
+  {email:"acgranda@faces.org.ec",nombre:"GRANDA ROMERO ANDREA CRISTINA",rol:"jefe_agencia",region:"COSTA",zona:"ZONA 4 EL ORO",agencia:"PIÑAS"},
+  {email:"mfolmedo@faces.org.ec",nombre:"OLMEDO MENDOZA MARIA FERNANDA",rol:"jefe_agencia",region:"NORTE",zona:"ZONA 7 COSTA NORTE",agencia:"SANTO DOMINGO"},
+  {email:"cmsanchez@faces.org.ec",nombre:"SANCHEZ LEON CRISTHIAM MAURICIO",rol:"jefe_agencia",region:"SUR",zona:"ZONA 1 LOJA",agencia:"OFICINA LAS PITAS"},
+  {email:"jlbustamante@faces.org.ec",nombre:"BUSTAMANTE JUMBO JORGE LUIS",rol:"jefe_agencia",region:"SUR",zona:"ZONA 2 LOJA",agencia:"CELICA"},
+  {email:"zeochoa@faces.org.ec",nombre:"OCHOA JIMENEZ ZAFIRO ELIZABETH",rol:"jefe_agencia",region:"COSTA",zona:"ZONA 5 GUAYAS",agencia:"MILAGRO"},
+  {email:"ratomala@faces.org.ec",nombre:"TOMALA BARCO ROSA ANA",rol:"jefe_regional",region:"COSTA",zona:"ZONA 4 EL ORO",agencia:""},
+  {email:"mearreaga@faces.org.ec",nombre:"ARREAGA ALAVA MARIA ELENA",rol:"jefe_agencia",region:"COSTA",zona:"ZONA 5 GUAYAS",agencia:"LA TRONCAL"},
+  {email:"odescobar@faces.org.ec",nombre:"ESCOBAR NOLE OMAR DANIEL",rol:"jefe_agencia",region:"COSTA",zona:"ZONA 4 EL ORO",agencia:"SANTA ROSA"},
+  {email:"raanton@faces.org.ec",nombre:"ANTON GOMEZ RUTH ALICIA",rol:"jefe_agencia",region:"COSTA",zona:"ZONA 4 EL ORO",agencia:"PASAJE"},
+  {email:"aegonzalez@faces.org.ec",nombre:"GONZALEZ PAZ ALEX EDUARDO",rol:"jefe_zonal",region:"COSTA",zona:"ZONA 5 GUAYAS",agencia:""},
+  {email:"msordonez@faces.org.ec",nombre:"ORDOÑEZ UREÑA MARIA STEFANYA",rol:"jefe_zonal",region:"",zona:"",agencia:""},
+  {email:"rvnarvaez@faces.org.ec",nombre:"NARVAEZ GARZON RAMIRO VLADIMIR",rol:"gerente",region:"",zona:"",agencia:""},
+  {email:"ksvalarezo@faces.org.ec",nombre:"VALAREZO MARTINEZ KARLA SILVANA",rol:"jefe_agencia",region:"SUR",zona:"ZONA 1 LOJA",agencia:"OFICINA NORTE"},
+  {email:"jmmediavilla@faces.org.ec",nombre:"MEDIAVILLA VARELA JESSICA MARIBEL",rol:"jefe_zonal",region:"NORTE",zona:"",agencia:""},
+  {email:"crcajamarca@faces.org.ec",nombre:"CAJAMARCA NUGRA CESAR ROGELIO",rol:"jefe_zonal",region:"",zona:"",agencia:""},
+  {email:"fpsambachi@faces.org.ec",nombre:"SAMBACHI SAMBACHI FREDY PATRICIO",rol:"jefe_agencia",region:"NORTE",zona:"ZONA 6 SIERRA NORTE",agencia:"AMAGUAÑA"},
+  {email:"mecorrea@faces.org.ec",nombre:"CORREA QUIÑONEZ MARLIN ERIKA",rol:"jefe_zonal",region:"COSTA",zona:"ZONA 4 EL ORO",agencia:""},
+  {email:"ratorres@faces.org.ec",nombre:"TORRES VELASCO RAMIRO ALEXANDER",rol:"jefe_agencia",region:"NORTE",zona:"ZONA 6 SIERRA NORTE",agencia:"TUMBACO"}
+];
 
 /* Estructura organizacional: Regional > Zona > Oficina (División de Oficinas de Faces) */
 const ESTRUCTURA = {"SUR":{"ZONA 1 LOJA":["OFICINA CENTRO","OFICINA LAS PITAS","OFICINA NORTE"],"ZONA 2 LOJA":["CARIAMANGA","CATACOCHA","CATAMAYO","CELICA"],"ZONA 3 ZAMORA":["MALACATOS","PALANDA","ZAMORA","ZUMBA"]},"COSTA":{"ZONA 4 EL ORO":["PASAJE","PIÑAS","SANTA ROSA"],"ZONA 5 GUAYAS":["LA TRONCAL","MILAGRO","NARANJAL"]},"NORTE":{"ZONA 6 SIERRA NORTE":["AMAGUAÑA","CAYAMBE","QUINCHE","TUMBACO"],"ZONA 7 COSTA NORTE":["EL CARMEN","FLAVIO ALFARO","QUININDE","SAN MIGUEL","SANTO DOMINGO"]}};
@@ -810,7 +859,7 @@ const Store=(()=>{
     try{localStorage.setItem(KEY,JSON.stringify(arr));}catch(e){ mem=arr; }
   }
   async function readAll(){
-    if(SESSION.mode==='supervisor'){
+    if(SESSION.mode==='supervisor'||SESSION.mode==='admin'){
       const q=await fbDB.collection('evaluaciones').where('periodo','==',PERIODO_ACTUAL).get();
       return q.docs.map(d=>d.data());
     }
@@ -822,12 +871,12 @@ const Store=(()=>{
   }
   async function saveOne(ev){
     if(SESSION.mode==='supervisor') throw new Error('Modo supervisión: solo lectura');
-    if(SESSION.mode==='evaluador'){ await fbDB.collection('evaluaciones').doc(ev.id).set(ev); return; }
+    if(SESSION.mode==='evaluador'||SESSION.mode==='admin'){ await fbDB.collection('evaluaciones').doc(ev.id).set(ev); return; }
     const arr=await localRead(); const i=arr.findIndex(e=>e.id===ev.id); if(i>=0)arr[i]=ev; else arr.push(ev); await localWrite(arr);
   }
   async function removeOne(id){
     if(SESSION.mode==='supervisor') throw new Error('Modo supervisión: solo lectura');
-    if(SESSION.mode==='evaluador'){ await fbDB.collection('evaluaciones').doc(id).delete(); return; }
+    if(SESSION.mode==='evaluador'||SESSION.mode==='admin'){ await fbDB.collection('evaluaciones').doc(id).delete(); return; }
     const arr=await localRead(); await localWrite(arr.filter(e=>e.id!==id));
   }
   return {readAll,saveOne,removeOne};
@@ -1259,7 +1308,7 @@ function exportExcel(){
   ws['!cols']=[{wch:34},{wch:14},{wch:22},{wch:14},{wch:16},{wch:16},{wch:22},{wch:22},{wch:11},{wch:22},{wch:26},{wch:12},{wch:10}];
   for(let R=1;R<rows.length;R++){ ['G','H','I'].forEach(C=>{const cell=ws[C+(R+1)]; if(cell){cell.t='n';cell.z='0.00"%"';}}); }
   XLSX.utils.book_append_sheet(wb,ws,'Consolidado');
-  const scope=SESSION.mode==='supervisor'?'TODAS':'mis';
+  const scope=(SESSION.mode==='supervisor'||SESSION.mode==='admin')?'TODAS':'mis';
   XLSX.writeFile(wb,'Consolidado_Evaluaciones_Faces_'+PERIODO_ACTUAL+'.xlsx');
   toast('Excel exportado ('+list.length+' '+(scope==='TODAS'?'evaluaciones':'evaluaciones mías')+')');
 }
@@ -1791,6 +1840,10 @@ function hideLogin(){ $('loginScreen').classList.add('hide'); }
 
 async function resolveSession(user){
   const email=(user.email||'').toLowerCase();
+  if(ADMINS.includes(email)){
+    SESSION={email,nombre:'Administrador · '+email,rol:'admin',mode:'admin',profile:{nombre:'Administrador'}};
+    return true;
+  }
   if(SUPERVISORES.includes(email)){
     SESSION={email,nombre:'Supervisión',rol:'supervisor',mode:'supervisor',profile:{nombre:'Supervisión'}};
     return true;
@@ -1810,18 +1863,21 @@ function paintSession(){
   $('sessName').textContent=SESSION.nombre||SESSION.email;
   $('sessRol').textContent=(ROL_LBL[SESSION.rol]||SESSION.rol)+(SESSION.profile&&SESSION.profile.agencia?' · '+SESSION.profile.agencia:(SESSION.profile&&SESSION.profile.zona?' · '+SESSION.profile.zona:''));
   const sup=SESSION.mode==='supervisor';
-  $('sessChip').classList.toggle('sup',sup);
+  const admin=SESSION.mode==='admin';
+  $('sessChip').classList.toggle('sup',sup||admin);
   document.body.classList.toggle('supervisor',sup);
-  $('adminBtn').style.display = sup ? '' : 'none';
+  $('adminBtn').style.display = (sup||admin) ? '' : 'none';
   $('panelBtn').style.display = sup ? 'none' : '';
-  $('xlsBtn').title = sup ? 'Exportar TODAS las evaluaciones a Excel' : 'Exportar mis evaluaciones a Excel';
-  // banner supervisor
+  $('xlsBtn').title = (sup||admin) ? 'Exportar TODAS las evaluaciones a Excel' : 'Exportar mis evaluaciones a Excel';
+  // banner de contexto
   let b=$('supBanner');
-  if(sup){
+  if(sup||admin){
     if(!b){ b=document.createElement('div'); b.id='supBanner'; b.className='sup-banner';
-      b.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg><span><b>Modo supervisión (solo lectura).</b> Visualizas todas las evaluaciones del período '+PERIODO_ACTUAL+'. No puedes editarlas; puedes exportarlas a Excel.</span>';
-      const wrap=document.querySelector('.main .wrap'); wrap.insertBefore(b,wrap.firstChild);
-    }
+      const wrap=document.querySelector('.main .wrap'); wrap.insertBefore(b,wrap.firstChild); }
+    b.classList.toggle('admin',admin);
+    b.innerHTML = admin
+      ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l7 4v6c0 5-3.5 8-7 10-3.5-2-7-5-7-10V6z"/></svg><span><b>Modo administrador · acceso total.</b> Ves y puedes editar todas las evaluaciones del período '+PERIODO_ACTUAL+', y gestionar usuarios. Úsalo con cuidado.</span>'
+      : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg><span><b>Modo supervisión (solo lectura).</b> Visualizas todas las evaluaciones del período '+PERIODO_ACTUAL+'. No puedes editarlas; puedes exportarlas a Excel.</span>';
   } else if(b){ b.remove(); }
 }
 async function enterApp(){
@@ -1929,9 +1985,11 @@ function renderAdmin(users){
   </div>`;
   $('adminBody').innerHTML=`
     <div class="adm-note">Registra el perfil de cada evaluador. La cuenta de acceso (correo + contraseña) se crea aparte en <b>Authentication</b>; el correo debe coincidir. <b>Región, Zona y Agencia</b> definen cómo se agrupan las evaluaciones en la vista de supervisión.</div>
+    <div class="adm-seed"><div><b>Cargar nómina inicial</b> · registra de una vez los ${SEED_USERS.length} perfiles del Área de Negocios (no crea las contraseñas, solo los perfiles). No sobrescribe cambios manuales.</div><button id="seedBtn">Cargar ${SEED_USERS.length} perfiles</button></div>
     ${users.map(u=>card(u,false)).join('')}
     <div class="adm-sep">Nuevo usuario</div>
     ${card({rol:'jefe_agencia'},true)}`;
+  const sb=$('seedBtn'); if(sb) sb.onclick=seedUsers;
   $('adminBody').querySelectorAll('.adm-card').forEach(rw=>{
     const btn=rw.querySelector('[data-act]'); if(!btn)return;
     btn.onclick=async()=>{
@@ -1945,6 +2003,17 @@ function renderAdmin(users){
 }
 $('adminBtn').onclick=openAdmin;
 $('adminClose').onclick=()=>$('adminModal').classList.remove('show');
+async function seedUsers(){
+  if(!confirm('¿Cargar los '+SEED_USERS.length+' perfiles de la nómina inicial?\nSe crean/actualizan los perfiles (no las contraseñas). No borra evaluaciones ni sobrescribe usuarios que edites después.'))return;
+  const sb=$('seedBtn'); if(sb){sb.disabled=true;sb.textContent='Cargando…';}
+  let ok=0,err=0;
+  for(const u of SEED_USERS){
+    try{ await fbDB.collection('usuarios').doc(u.email).set({nombre:u.nombre,rol:u.rol,region:u.region,zona:u.zona,agencia:u.agencia},{merge:true}); ok++; }
+    catch(e){ console.error('seed',u.email,e); err++; }
+  }
+  toast('Nómina cargada: '+ok+' perfiles'+(err?(' · '+err+' con error'):''));
+  openAdmin();
+}
 
 /* ============================ DASHBOARD DEL EQUIPO (evaluador) ============================ */
 function openDash(){ $('dashModal').classList.add('show'); renderDashboard(); }
