@@ -405,6 +405,8 @@ input,textarea,select{font-family:inherit;font-size:13.5px;color:var(--tx)}
 .sup-banner.admin svg,.sup-banner.admin b{color:#1f9d57}
 body.supervisor .tabpane input,body.supervisor .tabpane textarea,body.supervisor .tabpane select,body.supervisor .tabpane .na-btn,body.supervisor .tabpane .rate button{pointer-events:none;background:#fbfbfc}
 body.supervisor #saveBtn,body.supervisor #newBtn,body.supervisor #addDev,body.supervisor .pdf-label,body.supervisor #useConcBtn,body.supervisor .del-btn,body.supervisor #dropZone{display:none!important}
+body.roeval .tabpane input,body.roeval .tabpane textarea,body.roeval .tabpane select,body.roeval .tabpane .na-btn,body.roeval .tabpane .rate button{pointer-events:none;background:#fbfbfc}
+body.roeval #saveBtn,body.roeval #addDev,body.roeval .pdf-label,body.roeval #useConcBtn,body.roeval .del-btn,body.roeval #dropZone{display:none!important}
 /* admin */
 .adm-card{display:grid;grid-template-columns:1fr 1fr;gap:8px;border:1px solid var(--line);border-radius:9px;padding:10px;margin-bottom:9px}
 .adm-card.nuevo{border-style:dashed;border-color:var(--rojo);background:#fffafb}
@@ -904,13 +906,15 @@ const Store=(()=>{
     return await localRead();
   }
   async function saveOne(ev){
-    if(SESSION.mode==='supervisor'||SESSION.mode==='admin') throw new Error('Solo lectura: no puedes modificar evaluaciones');
-    if(SESSION.mode==='evaluador'){ await fbDB.collection('evaluaciones').doc(ev.id).set(ev); return; }
+    if(SESSION.mode==='supervisor') throw new Error('Modo supervisión: solo lectura');
+    if(SESSION.mode==='admin' && ev.evaluadorEmail && ev.evaluadorEmail!==SESSION.email) throw new Error('Solo puedes editar tus propias evaluaciones');
+    if(SESSION.mode==='evaluador'||SESSION.mode==='admin'){ await fbDB.collection('evaluaciones').doc(ev.id).set(ev); return; }
     const arr=await localRead(); const i=arr.findIndex(e=>e.id===ev.id); if(i>=0)arr[i]=ev; else arr.push(ev); await localWrite(arr);
   }
   async function removeOne(id){
-    if(SESSION.mode==='supervisor'||SESSION.mode==='admin') throw new Error('Solo lectura: no puedes eliminar evaluaciones');
-    if(SESSION.mode==='evaluador'){ await fbDB.collection('evaluaciones').doc(id).delete(); return; }
+    if(SESSION.mode==='supervisor') throw new Error('Modo supervisión: solo lectura');
+    if(SESSION.mode==='admin'){ const _e=DB.find(x=>x.id===id); if(_e && _e.evaluadorEmail && _e.evaluadorEmail!==SESSION.email) throw new Error('Solo puedes eliminar tus propias evaluaciones'); }
+    if(SESSION.mode==='evaluador'||SESSION.mode==='admin'){ await fbDB.collection('evaluaciones').doc(id).delete(); return; }
     const arr=await localRead(); await localWrite(arr.filter(e=>e.id!==id));
   }
   return {readAll,saveOne,removeOne};
@@ -1577,9 +1581,9 @@ async function refreshDB(){ try{ DB=await Store.readAll(); }catch(e){ console.er
 
 function tagEval(ev){
   ev.periodo = ev.periodo || PERIODO_ACTUAL;
-  if(SESSION.mode==='evaluador'){
+  if(SESSION.mode==='evaluador'||SESSION.mode==='admin'){
     ev.evaluadorEmail = SESSION.email;
-    ev.evaluadorNombre = SESSION.nombre || SESSION.email;
+    ev.evaluadorNombre = (SESSION.profile&&SESSION.profile.nombre&&SESSION.profile.nombre!=='Administrador'?SESSION.profile.nombre:(SESSION.nombre||SESSION.email));
     ev.evaluadorRol = SESSION.rol || '';
     const p=SESSION.profile||{};
     ev.region = ev.region || p.region || '';
@@ -1590,7 +1594,8 @@ function tagEval(ev){
   return ev;
 }
 async function saveCur(silent){
-  if(SESSION.mode==='supervisor'||SESSION.mode==='admin'){ toast('Solo lectura: no puedes modificar evaluaciones',true); return false; }
+  if(SESSION.mode==='supervisor'){ toast('Modo supervisión: solo lectura',true); return false; }
+  if(SESSION.mode==='admin' && cur.evaluadorEmail && cur.evaluadorEmail!==SESSION.email){ toast('Solo puedes editar tus propias evaluaciones',true); return false; }
   if(!cur.colaborador.trim()){ if(!silent){switchTab('datos');$('f_colaborador').focus();toast('Ingresa el nombre del colaborador',true);} return false; }
   cur.updatedAt=Date.now();
   tagEval(cur);
@@ -1628,11 +1633,12 @@ function loadEval(id){
   fullRender(); toast('Evaluación cargada: '+(e.colaborador||''));
 }
 function newEvalAction(){
-  if(SESSION.mode==='supervisor'||SESSION.mode==='admin'){ toast('Solo lectura: no puedes crear evaluaciones',true); return; }
+  if(SESSION.mode==='supervisor'){ toast('Modo supervisión: solo lectura',true); return; }
   cur=newEval(); fullRender(); switchTab('datos'); renderTeam($('searchInput').value);
 }
 async function deleteEval(id,nombre){
-  if(SESSION.mode==='supervisor'||SESSION.mode==='admin'){ toast('Solo lectura: no puedes eliminar evaluaciones',true); return; }
+  if(SESSION.mode==='supervisor'){ toast('Modo supervisión: solo lectura',true); return; }
+  { const _e=DB.find(x=>x.id===id); if(SESSION.mode==='admin' && _e && _e.evaluadorEmail && _e.evaluadorEmail!==SESSION.email){ toast('Solo puedes eliminar tus propias evaluaciones',true); return; } }
   if(!confirm('¿Eliminar la evaluación de "'+(nombre||'sin nombre')+'"?\nEsta acción no se puede deshacer.'))return;
   try{ await Store.removeOne(id); }
   catch(e){ console.error(e); toast('No se pudo eliminar: '+(e.message||e),true); return; }
@@ -1643,7 +1649,18 @@ async function deleteEval(id,nombre){
 let autoT=null;
 function scheduleAuto(){ /* placeholder para auto-guardado futuro */ }
 
-function fullRender(){ bindTop(); renderObj(); renderComp(); renderDev(); renderPlanHead(); recompute(); renderTeam($('searchInput').value); }
+function applyEditLock(){
+  const b=document.body;
+  if(SESSION.mode==='supervisor'){ b.classList.add('supervisor'); b.classList.remove('roeval'); return; }
+  b.classList.remove('supervisor');
+  if(SESSION.mode==='admin'){
+    const propia = !cur.evaluadorEmail || cur.evaluadorEmail===SESSION.email;
+    b.classList.toggle('roeval', !propia);   // bloquea solo si es de otro evaluador
+  } else {
+    b.classList.remove('roeval');
+  }
+}
+function fullRender(){ bindTop(); renderObj(); renderComp(); renderDev(); renderPlanHead(); recompute(); renderTeam($('searchInput').value); applyEditLock(); }
 
 /* ============================ TABS ============================ */
 function switchTab(name){
@@ -1879,7 +1896,9 @@ function hideLogin(){ $('loginScreen').classList.add('hide'); }
 async function resolveSession(user){
   const email=(user.email||'').toLowerCase();
   if(ADMINS.includes(email)){
-    SESSION={email,nombre:'Administrador · '+email,rol:'admin',mode:'admin',profile:{nombre:'Administrador'}};
+    let realName='';
+    try{ const snap=await fbDB.collection('usuarios').doc(email).get(); if(snap.exists) realName=(snap.data().nombre||''); }catch(_){}
+    SESSION={email,nombre:'Administrador · '+email,rol:'admin',mode:'admin',profile:{nombre:realName||'Administrador'}};
     return true;
   }
   if(SUPERVISORES.includes(email)){
@@ -1903,7 +1922,8 @@ function paintSession(){
   const sup=SESSION.mode==='supervisor';
   const admin=SESSION.mode==='admin';
   $('sessChip').classList.toggle('sup',sup||admin);
-  document.body.classList.toggle('supervisor',sup||admin);
+  document.body.classList.toggle('supervisor',sup);
+  applyEditLock();
   $('adminBtn').style.display = (sup||admin) ? '' : 'none';
   $('segBtn').style.display = (sup||admin) ? '' : 'none';
   $('panelBtn').style.display = (sup||admin) ? 'none' : '';
@@ -1915,7 +1935,7 @@ function paintSession(){
       const wrap=document.querySelector('.main .wrap'); wrap.insertBefore(b,wrap.firstChild); }
     b.classList.toggle('admin',admin);
     b.innerHTML = admin
-      ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l7 4v6c0 5-3.5 8-7 10-3.5-2-7-5-7-10V6z"/></svg><span><b>Modo administrador · gestión y consulta.</b> Ves todas las evaluaciones del período '+PERIODO_ACTUAL+' (solo lectura) y gestionas los usuarios y accesos. No editas las evaluaciones.</span>'
+      ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l7 4v6c0 5-3.5 8-7 10-3.5-2-7-5-7-10V6z"/></svg><span><b>Modo administrador.</b> Ves todas las evaluaciones del período '+PERIODO_ACTUAL+' (las de otros, en solo lectura) y puedes crear y editar las de <b>tu propio equipo</b>. Gestionas usuarios y accesos.</span>'
       : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg><span><b>Modo supervisión (solo lectura).</b> Visualizas todas las evaluaciones del período '+PERIODO_ACTUAL+'. No puedes editarlas; puedes exportarlas a Excel.</span>';
   } else if(b){ b.remove(); }
 }
