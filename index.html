@@ -382,6 +382,12 @@ input,textarea,select{font-family:inherit;font-size:13.5px;color:var(--tx)}
 .login-card h2{margin:0;font-size:19px;letter-spacing:-.3px}
 .login-sub{margin:3px 0 20px;color:var(--tx-faint);font-size:12.5px;font-weight:600}
 .login-field{text-align:left;margin-bottom:13px}
+.pwd-wrap{position:relative}
+.pwd-wrap input{width:100%;padding-right:42px!important}
+.pwd-eye{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:32px;height:32px;display:flex;align-items:center;justify-content:center;background:none;border:none;color:var(--tx-faint);cursor:pointer;padding:0}
+.pwd-eye:hover{color:var(--rojo)}
+.pwd-eye svg{width:19px;height:19px}
+.pwd-eye.on{color:var(--rojo)}
 .login-field label{display:block;font-size:11px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:var(--tx-faint);margin-bottom:5px}
 .login-field input{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:9px;font-size:14px}
 .login-field input:focus{outline:none;border-color:var(--rojo);box-shadow:0 0 0 3px rgba(200,16,46,.1)}
@@ -404,6 +410,10 @@ body.supervisor #saveBtn,body.supervisor #newBtn,body.supervisor #addDev,body.su
 .adm-card.nuevo{border-style:dashed;border-color:var(--rojo);background:#fffafb}
 .adm-card input,.adm-card select{padding:8px;border:1px solid var(--line);border-radius:7px;font-size:12.5px;width:100%}
 .adm-card input[readonly]{background:#f4f5f7;color:var(--tx-faint)}
+.adm-reset{grid-column:span 2;display:flex;align-items:center;justify-content:center;gap:7px;background:#fff;color:var(--rojo);border:1px solid #f0c4cb;border-radius:7px;padding:8px;font-weight:700;font-size:12px;cursor:pointer}
+.adm-reset:hover{background:#fff5f6}
+.adm-reset:disabled{opacity:.5;cursor:default}
+.adm-reset svg{width:15px;height:15px}
 .adm-save{grid-column:1/3;border:none;border-radius:7px;background:var(--rojo);color:#fff;padding:8px;font-size:12.5px;font-weight:700;cursor:pointer}
 .adm-save:hover{background:var(--rojo-d)}
 .adm-sep{grid-column:1/3;font-size:10.5px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:var(--tx-faint);margin:6px 0 4px}
@@ -724,7 +734,7 @@ body.supervisor #saveBtn,body.supervisor #newBtn,body.supervisor #addDev,body.su
     <h2>Evaluación de Desempeño</h2>
     <p class="login-sub">Faces · Talento Humano</p>
     <div class="login-field"><label>Correo</label><input type="email" id="loginEmail" placeholder="usuario@faces.fin.ec" autocomplete="username"></div>
-    <div class="login-field"><label>Contraseña</label><input type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password"></div>
+    <div class="login-field"><label>Contraseña</label><div class="pwd-wrap"><input type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password"><button type="button" class="pwd-eye" data-target="loginPass" title="Mostrar/ocultar contraseña"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></div></div>
     <button class="btn primary login-btn" id="loginBtn">Ingresar</button>
     <button type="button" class="login-link" id="forgotBtn">¿Olvidaste tu contraseña?</button>
     <div class="login-msg" id="loginMsg"></div>
@@ -770,9 +780,9 @@ body.supervisor #saveBtn,body.supervisor #newBtn,body.supervisor #addDev,body.su
       <button class="btn ghost sm" id="pwdClose">✕</button>
     </div>
     <div class="modal-b">
-      <div class="login-field" style="margin-bottom:11px"><label>Contraseña actual</label><input type="password" id="pwdCur" placeholder="••••••••" autocomplete="current-password"></div>
-      <div class="login-field" style="margin-bottom:11px"><label>Nueva contraseña</label><input type="password" id="pwdNew" placeholder="Mínimo 6 caracteres" autocomplete="new-password"></div>
-      <div class="login-field"><label>Confirmar nueva contraseña</label><input type="password" id="pwdNew2" placeholder="Repite la nueva contraseña" autocomplete="new-password"></div>
+      <div class="login-field" style="margin-bottom:11px"><label>Contraseña actual</label><div class="pwd-wrap"><input type="password" id="pwdCur" placeholder="••••••••" autocomplete="current-password"><button type="button" class="pwd-eye" data-target="pwdCur"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></div></div>
+      <div class="login-field" style="margin-bottom:11px"><label>Nueva contraseña</label><div class="pwd-wrap"><input type="password" id="pwdNew" placeholder="Mínimo 6 caracteres" autocomplete="new-password"><button type="button" class="pwd-eye" data-target="pwdNew"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></div></div>
+      <div class="login-field"><label>Confirmar nueva contraseña</label><div class="pwd-wrap"><input type="password" id="pwdNew2" placeholder="Repite la nueva contraseña" autocomplete="new-password"><button type="button" class="pwd-eye" data-target="pwdNew2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></div></div>
       <div class="login-msg" id="pwdMsg"></div>
     </div>
     <div class="modal-f">
@@ -894,13 +904,13 @@ const Store=(()=>{
     return await localRead();
   }
   async function saveOne(ev){
-    if(SESSION.mode==='supervisor') throw new Error('Modo supervisión: solo lectura');
-    if(SESSION.mode==='evaluador'||SESSION.mode==='admin'){ await fbDB.collection('evaluaciones').doc(ev.id).set(ev); return; }
+    if(SESSION.mode==='supervisor'||SESSION.mode==='admin') throw new Error('Solo lectura: no puedes modificar evaluaciones');
+    if(SESSION.mode==='evaluador'){ await fbDB.collection('evaluaciones').doc(ev.id).set(ev); return; }
     const arr=await localRead(); const i=arr.findIndex(e=>e.id===ev.id); if(i>=0)arr[i]=ev; else arr.push(ev); await localWrite(arr);
   }
   async function removeOne(id){
-    if(SESSION.mode==='supervisor') throw new Error('Modo supervisión: solo lectura');
-    if(SESSION.mode==='evaluador'||SESSION.mode==='admin'){ await fbDB.collection('evaluaciones').doc(id).delete(); return; }
+    if(SESSION.mode==='supervisor'||SESSION.mode==='admin') throw new Error('Solo lectura: no puedes eliminar evaluaciones');
+    if(SESSION.mode==='evaluador'){ await fbDB.collection('evaluaciones').doc(id).delete(); return; }
     const arr=await localRead(); await localWrite(arr.filter(e=>e.id!==id));
   }
   return {readAll,saveOne,removeOne};
@@ -1493,7 +1503,7 @@ function renderTeam(filter=''){
   const match=e=>!f||[e.colaborador,e.agencia,e.zona,e.region,e.evaluadorNombre].some(v=>(v||'').toLowerCase().includes(f));
   const items=DB.filter(match);
 
-  if(SESSION.mode==='supervisor'){ renderTeamTree(list,items,!!f); return; }
+  if(SESSION.mode==='supervisor'||SESSION.mode==='admin'){ renderTeamTree(list,items,!!f); return; }
 
   // lista simple (evaluador / local)
   const sorted=items.slice().sort((a,b)=>b.updatedAt-a.updatedAt);
@@ -1510,7 +1520,12 @@ function renderTeam(filter=''){
     list.appendChild(it);
   });
 }
-const GK={region:e=>e.region||'Sin región',zona:e=>e.zona||'Sin zona',agencia:e=>e.agencia||'Sin agencia'};
+const _norm=v=>(v||'').trim().toUpperCase();
+const GK={
+  region:e=>_norm(e.region)||'SIN REGIÓN',
+  zona:e=>_norm(e.zona)||'SIN ZONA',
+  agencia:e=>{ const a=_norm(e.agencia); return (!a||a==='MATRIZ'||a.indexOf('NO APLICA')>=0)?'— SIN OFICINA —':a; }
+};
 function renderTeamTree(list,items,expandAll){
   if(!items.length){ list.innerHTML='<div class="empty-team">No hay evaluaciones para mostrar.</div>'; return; }
   const tree={};
@@ -1575,7 +1590,7 @@ function tagEval(ev){
   return ev;
 }
 async function saveCur(silent){
-  if(SESSION.mode==='supervisor'){ toast('Modo supervisión: solo lectura',true); return false; }
+  if(SESSION.mode==='supervisor'||SESSION.mode==='admin'){ toast('Solo lectura: no puedes modificar evaluaciones',true); return false; }
   if(!cur.colaborador.trim()){ if(!silent){switchTab('datos');$('f_colaborador').focus();toast('Ingresa el nombre del colaborador',true);} return false; }
   cur.updatedAt=Date.now();
   tagEval(cur);
@@ -1613,10 +1628,11 @@ function loadEval(id){
   fullRender(); toast('Evaluación cargada: '+(e.colaborador||''));
 }
 function newEvalAction(){
+  if(SESSION.mode==='supervisor'||SESSION.mode==='admin'){ toast('Solo lectura: no puedes crear evaluaciones',true); return; }
   cur=newEval(); fullRender(); switchTab('datos'); renderTeam($('searchInput').value);
 }
 async function deleteEval(id,nombre){
-  if(SESSION.mode==='supervisor'){ toast('Modo supervisión: solo lectura',true); return; }
+  if(SESSION.mode==='supervisor'||SESSION.mode==='admin'){ toast('Solo lectura: no puedes eliminar evaluaciones',true); return; }
   if(!confirm('¿Eliminar la evaluación de "'+(nombre||'sin nombre')+'"?\nEsta acción no se puede deshacer.'))return;
   try{ await Store.removeOne(id); }
   catch(e){ console.error(e); toast('No se pudo eliminar: '+(e.message||e),true); return; }
@@ -1887,10 +1903,10 @@ function paintSession(){
   const sup=SESSION.mode==='supervisor';
   const admin=SESSION.mode==='admin';
   $('sessChip').classList.toggle('sup',sup||admin);
-  document.body.classList.toggle('supervisor',sup);
+  document.body.classList.toggle('supervisor',sup||admin);
   $('adminBtn').style.display = (sup||admin) ? '' : 'none';
   $('segBtn').style.display = (sup||admin) ? '' : 'none';
-  $('panelBtn').style.display = sup ? 'none' : '';
+  $('panelBtn').style.display = (sup||admin) ? 'none' : '';
   $('xlsBtn').title = (sup||admin) ? 'Exportar TODAS las evaluaciones a Excel' : 'Exportar mis evaluaciones a Excel';
   // banner de contexto
   let b=$('supBanner');
@@ -1899,17 +1915,19 @@ function paintSession(){
       const wrap=document.querySelector('.main .wrap'); wrap.insertBefore(b,wrap.firstChild); }
     b.classList.toggle('admin',admin);
     b.innerHTML = admin
-      ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l7 4v6c0 5-3.5 8-7 10-3.5-2-7-5-7-10V6z"/></svg><span><b>Modo administrador · acceso total.</b> Ves y puedes editar todas las evaluaciones del período '+PERIODO_ACTUAL+', y gestionar usuarios. Úsalo con cuidado.</span>'
+      ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l7 4v6c0 5-3.5 8-7 10-3.5-2-7-5-7-10V6z"/></svg><span><b>Modo administrador · gestión y consulta.</b> Ves todas las evaluaciones del período '+PERIODO_ACTUAL+' (solo lectura) y gestionas los usuarios y accesos. No editas las evaluaciones.</span>'
       : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg><span><b>Modo supervisión (solo lectura).</b> Visualizas todas las evaluaciones del período '+PERIODO_ACTUAL+'. No puedes editarlas; puedes exportarlas a Excel.</span>';
   } else if(b){ b.remove(); }
 }
 async function enterApp(){
   hideLogin(); paintSession();
   await refreshDB();
-  // cargar la primera evaluación del equipo o una nueva
-  if(SESSION.mode==='supervisor'){ cur=DB[0]?migrate(structuredClone(DB[0])):newEval(); }
+  // cargar la primera evaluación (supervisor/admin: consulta) o una nueva
+  if(SESSION.mode==='supervisor'||SESSION.mode==='admin'){ cur=DB[0]?migrate(structuredClone(DB[0])):newEval(); }
   else { cur=newEval(); }
   fullRender();
+  // Primer ingreso: obliga a cambiar la contraseña temporal (solo evaluadores)
+  if(SESSION.mode==='evaluador' && !(SESSION.profile&&SESSION.profile.pwdChanged)){ openPwd(true); }
 }
 
 function initAuth(){
@@ -1956,8 +1974,19 @@ async function forgotPassword(){
   }
 }
 /* ---- Cambiar contraseña (dentro de la app) ---- */
-function openPwd(){ $('pwdCur').value='';$('pwdNew').value='';$('pwdNew2').value='';$('pwdMsg').textContent='';$('pwdMsg').style.color=''; $('pwdModal').classList.add('show'); }
-function closePwd(){ $('pwdModal').classList.remove('show'); }
+let pwdForced=false;
+function openPwd(forced){
+  pwdForced=!!forced;
+  $('pwdCur').value='';$('pwdNew').value='';$('pwdNew2').value='';
+  const msg=$('pwdMsg');
+  if(forced){ msg.style.color='var(--rojo)'; msg.textContent='Por tu seguridad, cambia la contraseña temporal para continuar.'; }
+  else { msg.textContent=''; msg.style.color=''; }
+  $('pwdClose').style.display=forced?'none':'';
+  $('pwdCancel').style.display=forced?'none':'';
+  $('pwdModal').classList.add('show');
+}
+function closePwd(){ if(pwdForced)return; $('pwdModal').classList.remove('show'); }
+function _finishForcedPwd(){ pwdForced=false; $('pwdClose').style.display='';$('pwdCancel').style.display=''; $('pwdModal').classList.remove('show'); }
 async function doChangePwd(){
   const cur0=$('pwdCur').value, nw=$('pwdNew').value, nw2=$('pwdNew2').value;
   const msg=$('pwdMsg'); msg.style.color='var(--rojo)';
@@ -1972,6 +2001,11 @@ async function doChangePwd(){
     const cred=firebase.auth.EmailAuthProvider.credential(user.email,cur0);
     await user.reauthenticateWithCredential(cred);
     await user.updatePassword(nw);
+    if(pwdForced && SESSION.mode==='evaluador'){
+      try{ await fbDB.collection('usuarios').doc(SESSION.email).set({pwdChanged:true},{merge:true}); if(SESSION.profile)SESSION.profile.pwdChanged=true; }catch(_){}
+      msg.style.color='#1a7f37'; msg.textContent='✓ Contraseña actualizada. ¡Bienvenido!';
+      setTimeout(_finishForcedPwd,1400); return;
+    }
     msg.style.color='#1a7f37'; msg.textContent='✓ Contraseña actualizada correctamente.';
     setTimeout(closePwd,1400);
   }catch(e){
@@ -2005,6 +2039,7 @@ function renderAdmin(users){
     <input data-f="zona" placeholder="Zona" value="${esc(u.zona||'')}">
     <input data-f="agencia" placeholder="Agencia" value="${esc(u.agencia||'')}">
     <button class="adm-save" data-act="${isNew?'add':'save'}">${isNew?'+ Agregar usuario':'Guardar'}</button>
+    ${isNew?'':`<button class="adm-reset" data-reset="${esc(u.email||'')}" title="Enviar correo para que el usuario defina una nueva contraseña"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z" opacity="0"/><path d="M22 6l-10 7L2 6"/><path d="M2 6h20v12H2z"/></svg> Restablecer contraseña</button>`}
   </div>`;
   $('adminBody').innerHTML=`
     <div class="adm-note">Registra el perfil de cada evaluador. La cuenta de acceso (correo + contraseña) se crea aparte en <b>Authentication</b>; el correo debe coincidir. <b>Región, Zona y Agencia</b> definen cómo se agrupan las evaluaciones en la vista de supervisión.</div>
@@ -2013,6 +2048,16 @@ function renderAdmin(users){
     <div class="adm-sep">Nuevo usuario</div>
     ${card({rol:'jefe_agencia'},true)}`;
   const sb=$('seedBtn'); if(sb) sb.onclick=seedUsers;
+  $('adminBody').querySelectorAll('.adm-reset').forEach(b=>{
+    b.onclick=async()=>{
+      const em=b.dataset.reset; if(!em)return;
+      if(!confirm('¿Enviar un correo de restablecimiento de contraseña a:\n'+em+' ?\n\nLa persona recibirá un enlace para crear una nueva contraseña. Tú no verás la contraseña (por seguridad no es visible para nadie).'))return;
+      b.disabled=true;
+      try{ await fbAuth.sendPasswordResetEmail(em); toast('Correo de restablecimiento enviado a '+em); }
+      catch(e){ const m={'auth/user-not-found':'No existe una cuenta de acceso con ese correo','auth/invalid-email':'Correo inválido','auth/too-many-requests':'Demasiados intentos, espera un momento'}; toast(m[e.code]||('No se pudo enviar: '+(e.message||e)),true); }
+      b.disabled=false;
+    };
+  });
   $('adminBody').querySelectorAll('.adm-card').forEach(rw=>{
     const btn=rw.querySelector('[data-act]'); if(!btn)return;
     btn.onclick=async()=>{
@@ -2026,6 +2071,14 @@ function renderAdmin(users){
 }
 $('adminBtn').onclick=openAdmin;
 $('adminClose').onclick=()=>$('adminModal').classList.remove('show');
+// Mostrar/ocultar contraseña (ojito)
+document.addEventListener('click',e=>{
+  const b=e.target.closest('.pwd-eye'); if(!b)return;
+  const inp=$(b.dataset.target); if(!inp)return;
+  const show=inp.type==='password';
+  inp.type=show?'text':'password';
+  b.classList.toggle('on',show);
+});
 
 /* ============================ SEGUIMIENTO DE PLANES (supervisor · admin) ============================ */
 function openSeguimiento(){ $('segModal').classList.add('show'); renderSeguimiento(); }
