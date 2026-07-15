@@ -136,6 +136,11 @@ input,textarea,select{font-family:inherit;font-size:13.5px;color:var(--tx)}
 .obj-txt{font-size:12.3px;line-height:1.3;color:var(--tx)}
 .obj-p{text-align:right;font-size:12px;font-weight:700;color:var(--tx-soft);font-variant-numeric:tabular-nums}
 .num-in{position:relative}
+.num-in.locked input{background:#f2f7f4;border-color:#bfe3cb;color:#1f7a4d;font-weight:800;padding-right:38px;cursor:default}
+.num-in.locked .u{color:#1f7a4d}
+.lock-ic{position:absolute;right:22px;top:50%;transform:translateY(-50%);width:12px;height:12px;color:#1f9d57;pointer-events:none}
+input.lockedin{background:#f2f7f4!important;border-color:#bfe3cb!important;color:#1f7a4d!important;font-weight:800;cursor:default}
+.na-btn.dis{opacity:.35;cursor:not-allowed}
 .num-in input{width:100%;padding:6px 20px 6px 8px;border:1px solid var(--line);border-radius:6px;text-align:right;font-variant-numeric:tabular-nums;font-weight:700;font-size:12.5px}
 .num-in input:focus{outline:none;border-color:var(--rojo);box-shadow:0 0 0 3px rgba(200,16,46,.1)}
 .num-in .u{position:absolute;right:7px;top:7px;color:var(--tx-faint);font-size:11px;font-weight:700}
@@ -579,7 +584,7 @@ body.roeval #saveBtn,body.roeval #addDev,body.roeval .pdf-label,body.roeval #use
         <div class="card-b" style="padding:13px 14px">
           <div id="dropZone" class="drop-zone">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" width="18" height="18"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-            <span>Arrastra aquí el <b>PDF del core</b> o usa el botón «Cargar PDF del core» · se toman los % de la columna <b>CALIFICA</b></span>
+            <span>Arrastra aquí el <b>PDF del core</b> o usa el botón «Cargar PDF del core» · se toman los % de la columna <b>CALIFICA</b> y quedan <b>bloqueados</b> (no editables)</span>
           </div>
           <div id="objList"></div>
           <div class="obj-foot">
@@ -1148,8 +1153,8 @@ function renderObj(){
         ${sub.map((s,j)=>{const p=+s.plan||0,l=+s.logrado||0,pc=p>0?Math.min(l/p,1):1;
           return `<div class="soc-grid">
             <div class="soc-nm">${esc(s.nombre)}</div>
-            <div><input data-si="${i}" data-sj="${j}" data-sk="plan" type="number" step="1" min="0" value="${s.plan}"></div>
-            <div><input data-si="${i}" data-sj="${j}" data-sk="logrado" type="number" step="1" min="0" value="${s.logrado}"></div>
+            <div><input data-si="${i}" data-sj="${j}" data-sk="plan" type="number" step="1" min="0" value="${s.plan}"${s.src==='pdf'?' readonly class="lockedin" title="Valor cargado del PDF del core · no editable"':''}></div>
+            <div><input data-si="${i}" data-sj="${j}" data-sk="logrado" type="number" step="1" min="0" value="${s.logrado}"${s.src==='pdf'?' readonly class="lockedin" title="Valor cargado del PDF del core · no editable"':''}></div>
             <div class="soc-pct" data-pct="${i}-${j}" style="color:${banda(pc).c}">${(pc*100).toFixed(1).replace('.',',')}%</div>
           </div>`;}).join('')}
         <div class="soc-foot" data-foot="${i}">${socFoot(o)}</div>
@@ -1160,21 +1165,25 @@ function renderObj(){
       <span class="obj-n">${i+1}</span>
       <div class="obj-txt">${esc(o.desc)}</div>
       <div class="obj-p">${(+o.peso).toFixed(2)}%</div>
-      <div>${o.na?'<div class="na-cell">Sin dato</div>':`<div class="num-in"><input data-i="${i}" data-k="resultado" type="number" step="0.01" min="0" value="${o.resultado}"><span class="u">%</span></div>${floored?'<div class="floor-note">computa 0% (&lt;70%)</div>':''}`}</div>
+      <div>${o.na?'<div class="na-cell">Sin dato</div>':`<div class="num-in${o.src==='pdf'?' locked':''}"><input data-i="${i}" data-k="resultado" type="number" step="0.01" min="0" value="${o.resultado}"${o.src==='pdf'?' readonly title="Valor cargado del PDF del core · no editable"':''}><span class="u">%</span>${o.src==='pdf'?'<svg class="lock-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>':''}</div>${floored?'<div class="floor-note">computa 0% (&lt;70%)</div>':''}`}</div>
       <div class="obj-cmt"><input data-i="${i}" data-k="comentario" value="${esc(o.comentario)}" placeholder="Observaciones…"></div>
-      <button class="na-btn${o.na?' on':''}" data-na="${i}" title="Sin dato / no aplica">N/A</button>
+      <button class="na-btn${o.na?' on':''}${o.src==='pdf'?' dis':''}" data-na="${i}" title="${o.src==='pdf'?'Tiene dato oficial del core':'Sin dato / no aplica'}"${o.src==='pdf'?' disabled':''}>N/A</button>
     </div>`;
   }).join('')}</div>`;
   wrap.querySelectorAll('input[data-k]').forEach(inp=>{
+    if(inp.readOnly) return;                       // dato del core: no se altera
     const o=cur.objetivos[+inp.dataset.i], k=inp.dataset.k;
     inp.oninput=()=>{ o[k]=inp.value; if(k==='resultado')recompute(); };
   });
   wrap.querySelectorAll('input[data-sk]').forEach(inp=>{
+    if(inp.readOnly) return;                       // dato del core: no se altera
     const o=cur.objetivos[+inp.dataset.si], s=o.sub[+inp.dataset.sj], k=inp.dataset.sk;
     inp.oninput=()=>{ s[k]=inp.value; refreshSocial(+inp.dataset.si); recompute(); };
   });
   wrap.querySelectorAll('[data-na]').forEach(btn=>{
-    btn.onclick=()=>{ const o=cur.objetivos[+btn.dataset.na]; o.na=!o.na; renderObj(); recompute(); };
+    btn.onclick=()=>{ const o=cur.objetivos[+btn.dataset.na];
+      if(o.src==='pdf'){ toast('Ese indicador tiene dato oficial del core',true); return; }
+      o.na=!o.na; renderObj(); recompute(); };
   });
 }
 
@@ -1451,18 +1460,22 @@ function applyPdf(){
   if(p.header.agencia) cur.agencia=p.header.agencia;
   if(p.header.evaluador) cur.evaluador=p.header.evaluador;
   if(p.header.fecha){ cur.fecha=p.header.fecha; if(!cur.hasta)cur.hasta=p.header.fecha; }
-  // Indicadores directos: se llena el resultado; el estado N/A se respeta (no se fuerza a contar)
+  // Indicadores directos: se llena el resultado y se BLOQUEA (dato oficial del core)
   for(let i=0;i<=10;i++){
-    if(p.objetivos[i]!=null){ cur.objetivos[i].resultado=+p.objetivos[i].toFixed(2); }
+    if(p.objetivos[i]!=null){
+      cur.objetivos[i].resultado=+p.objetivos[i].toFixed(2);
+      cur.objetivos[i].src='pdf';           // origen: PDF del core -> no editable
+      cur.objetivos[i].na=false;            // tiene dato oficial
+    }
   }
   // Social
   const s=cur.objetivos[11]; if(s.tipo==='social'){ s.sub=s.sub||blankSocial();
-    if(p.social.lwc){ s.sub[0].plan=p.social.lwc.plan; s.sub[0].logrado=p.social.lwc.logrado; }
-    if(p.social.cap){ s.sub[1].plan=p.social.cap.plan; s.sub[1].logrado=p.social.cap.logrado; }
+    if(p.social.lwc){ s.sub[0].plan=p.social.lwc.plan; s.sub[0].logrado=p.social.lwc.logrado; s.sub[0].src='pdf'; }
+    if(p.social.cap){ s.sub[1].plan=p.social.cap.plan; s.sub[1].logrado=p.social.cap.logrado; s.sub[1].src='pdf'; }
   }
   $('pdfModal').classList.remove('show');
   fullRender(); switchTab('datos');
-  toast('Datos del PDF aplicados a la evaluación');
+  toast('Datos del core aplicados y bloqueados (no editables)');
 }
 
 /* ============================ RECOMPUTE / DASHBOARD ============================ */
