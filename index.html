@@ -1468,10 +1468,10 @@ function applyPdf(){
       cur.objetivos[i].na=false;            // tiene dato oficial
     }
   }
-  // Social
+  // Social: se aplican como punto de partida pero quedan EDITABLES (no vienen del core)
   const s=cur.objetivos[11]; if(s.tipo==='social'){ s.sub=s.sub||blankSocial();
-    if(p.social.lwc){ s.sub[0].plan=p.social.lwc.plan; s.sub[0].logrado=p.social.lwc.logrado; s.sub[0].src='pdf'; }
-    if(p.social.cap){ s.sub[1].plan=p.social.cap.plan; s.sub[1].logrado=p.social.cap.logrado; s.sub[1].src='pdf'; }
+    if(p.social.lwc){ s.sub[0].plan=p.social.lwc.plan; s.sub[0].logrado=p.social.lwc.logrado; delete s.sub[0].src; }
+    if(p.social.cap){ s.sub[1].plan=p.social.cap.plan; s.sub[1].logrado=p.social.cap.logrado; delete s.sub[1].src; }
   }
   $('pdfModal').classList.remove('show');
   fullRender(); switchTab('datos');
@@ -1637,6 +1637,8 @@ function migrate(ev){
     });
   }
   ev.scaleV=2;
+  // Los indicadores SOCIALES nunca se bloquean (dato manual): limpia marcas previas
+  (ev.objetivos||[]).forEach(o=>{ if(o&&o.tipo==='social'&&Array.isArray(o.sub)){ o.sub.forEach(x=>{ if(x&&x.src==='pdf') delete x.src; }); } });
   return ev;
 }
 function loadEval(id){
